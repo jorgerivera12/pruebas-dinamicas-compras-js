@@ -1,0 +1,86 @@
+
+> pruebas-dinamicas-compras-js@1.0.0 test
+> jest --runInBand
+
+FAIL tests/compras.test.js
+  RF-01 y RF-02: cálculo del total con datos válidos
+    ✓ CP-01: caso nominal -> 90 (3 ms)
+    ✓ CP-02: precio con decimales -> 30 (1 ms)
+    ✓ CP-03: límite precio = 0 (A-01) -> 0
+    ✓ CP-04: límite cantidad = 1 -> 49.99
+    ✓ CP-05: límite descuento = 0 -> 160 (1 ms)
+  RF-03: total con dos decimales
+    ✓ CP-06: descuento 100 % produce 0 -> 0 (1 ms)
+    ✕ CP-07: redondeo de 50,9745 -> 50.97 (3 ms)
+    ✕ CP-08: error de punto flotante -> 0.3 (1 ms)
+    ✕ CP-20: descuento 100 % con subtotal inexacto produce 0 -> 0 (1 ms)
+  RF-04: RangeError para valores fuera de rango
+    ✓ CP-09: precio = -0,01 -> RangeError (2 ms)
+    ✓ CP-10: cantidad = 0 -> RangeError (1 ms)
+    ✓ CP-11: cantidad negativa -> RangeError (1 ms)
+    ✓ CP-12: descuento = -0,01 -> RangeError (2 ms)
+    ✓ CP-13: descuento = 100,01 -> RangeError (2 ms)
+  RF-05: TypeError para entradas no numéricas o no finitas
+    ✓ CP-14: precio como texto -> TypeError (1 ms)
+    ✓ CP-15: cantidad null -> TypeError (7 ms)
+    ✓ CP-16: descuento undefined -> TypeError (2 ms)
+    ✓ CP-17: precio NaN -> TypeError (1 ms)
+    ✓ CP-18: cantidad Infinity -> TypeError (1 ms)
+    ✓ CP-19: descuento -Infinity (tipo antes que rango, A-04) -> TypeError
+
+  ● RF-03: total con dos decimales › CP-07: redondeo de 50,9745 -> 50.97
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 50.97
+    Received: 50.9745
+
+      28 |     { id: 'CP-20', datos: [0.07, 3, 100], esperado: 0, detalle: 'descuento 100 % con subtotal inexacto produce 0' },
+      29 |   ])('$id: $detalle -> $esperado', ({ datos, esperado }) => {
+    > 30 |     expect(calcularTotal(...datos)).toBe(esperado);
+         |                                     ^
+      31 |   });
+      32 | });
+      33 |
+
+      at toBe (tests/compras.test.js:30:37)
+
+  ● RF-03: total con dos decimales › CP-08: error de punto flotante -> 0.3
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 0.3
+    Received: 0.30000000000000004
+
+      28 |     { id: 'CP-20', datos: [0.07, 3, 100], esperado: 0, detalle: 'descuento 100 % con subtotal inexacto produce 0' },
+      29 |   ])('$id: $detalle -> $esperado', ({ datos, esperado }) => {
+    > 30 |     expect(calcularTotal(...datos)).toBe(esperado);
+         |                                     ^
+      31 |   });
+      32 | });
+      33 |
+
+      at toBe (tests/compras.test.js:30:37)
+
+  ● RF-03: total con dos decimales › CP-20: descuento 100 % con subtotal inexacto produce 0 -> 0
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 0
+    Received: -2.7755575615628914e-17
+
+      28 |     { id: 'CP-20', datos: [0.07, 3, 100], esperado: 0, detalle: 'descuento 100 % con subtotal inexacto produce 0' },
+      29 |   ])('$id: $detalle -> $esperado', ({ datos, esperado }) => {
+    > 30 |     expect(calcularTotal(...datos)).toBe(esperado);
+         |                                     ^
+      31 |   });
+      32 | });
+      33 |
+
+      at toBe (tests/compras.test.js:30:37)
+
+Test Suites: 1 failed, 1 total
+Tests:       3 failed, 17 passed, 20 total
+Snapshots:   0 total
+Time:        0.549 s, estimated 1 s
+Ran all test suites.

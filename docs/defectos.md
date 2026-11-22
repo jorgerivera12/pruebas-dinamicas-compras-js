@@ -25,6 +25,7 @@ La ejecución inicial con Jest dio 13 casos fallidos (`evidencias/pruebas-inicia
 | DEF-01 | El total no se redondea a dos decimales | RF-03 | CP-07, CP-08 | Media | Alta | Abierto |
 | DEF-02 | No se rechazan valores fuera de rango y el total puede quedar negativo | RF-04 | CP-09 a CP-13 | Alta | Alta | Corregido y verificado |
 | DEF-03 | No se rechazan entradas no numéricas ni no finitas | RF-05 | CP-14 a CP-19 | Alta | Alta | Corregido y verificado |
+| DEF-04 | El 100 % de descuento no siempre produce 0 | RF-03 | CP-20 (agregado después) | Media | Media | Abierto |
 
 ## DEF-01: el total no se redondea a dos decimales
 
@@ -88,11 +89,52 @@ La ejecución inicial con Jest dio 13 casos fallidos (`evidencias/pruebas-inicia
 | CP-18 | (100, Infinity, 10) | `NaN` | Se calcula `Infinity - Infinity`. |
 | CP-19 | (100, 2, -Infinity) | `Infinity` | El total es infinito. |
 
+## DEF-04: el 100 % de descuento no siempre produce 0
+
+Este defecto no salió de la ejecución inicial. Lo encontré después de corregir DEF-03, mientras exploraba las técnicas de redondeo para DEF-01 (ver "Exploración del redondeo" más abajo). Para confirmarlo agregué el caso CP-20 a la matriz y a la suite y lo ejecuté sobre el código del commit `9a57648`, sin tocar `src/compras.js`.
+
+| Campo | Detalle |
+|---|---|
+| Requisito | RF-03: "100 % produce 0". |
+| Casos | CP-20 |
+| Versión | `src/compras.js` del commit `9a57648`. El defecto ya existía en el código inicial (`373d625`): ahí `calcularTotal(0.07, 3, 100)` devuelve el mismo valor. |
+| Pasos | Llamar a `calcularTotal(0.07, 3, 100)`. |
+| Resultado esperado | `0` |
+| Resultado real | `-2.7755575615628914e-17` |
+| Severidad | **Media.** El valor es casi cero, pero no es cero. Lo comprobé en Node.js: `total === 0` da `false`, `total < 0` da `true`, `total.toFixed(2)` da `"-0.00"` y, formateado como moneda con `Intl.NumberFormat('es-EC', { style: 'currency', currency: 'USD' })`, se muestra **"$-0,00"**. Cualquier lógica del tipo "si el total es 0, no se cobra" falla, y el cliente vería un total negativo. |
+| Prioridad | **Media.** Solo afecta a las compras con 100 % de descuento, que son poco frecuentes, pero el requisito lo menciona de forma explícita. |
+| Causa probable | La fórmula `subtotal - subtotal * descuento / 100` hace dos operaciones con redondeo binario. Con descuento 100, `subtotal * 100 / 100` no siempre vuelve a dar exactamente `subtotal` (0,07 × 3 = 0,21000000000000002), y la resta deja un residuo. Revisé subtotales de 0,01 a 99 999,99 con cantidades 1, 3 y 7, y el residuo aparece en 2 899 312 de 29 999 997 combinaciones. |
+| Por qué CP-06 no lo detectó | 19,99 × 3 da un subtotal que se representa de forma exacta en binario. El caso de prueba pasaba, pero el requisito no se cumplía para otros datos. |
+| Evidencia | `evidencias/pruebas-caso-CP-20.txt` (Expected 0 / Received -2.7755575615628914e-17) y `npm run reproducir` |
+| Estado | Abierto |
+
+**Por qué es un defecto aparte de DEF-01.** Las dos causas tienen que ver con el punto flotante, pero redondear no lo resuelve. Lo comprobé: al aplicar a ese residuo el redondeo elegido para DEF-01, el resultado es `-0`, que sigue mostrándose como "$-0,00" y que `toBe(0)` (igualdad `Object.is`) distingue de `0`. Por eso necesita su propia corrección.
+
+## Exploración del redondeo (antes de corregir DEF-01)
+
+RF-03 no dice cómo redondear (A-03). Antes de elegir una técnica quise saber cuál da resultados correctos y cuál no. Para eso escribí `scripts/explorar-redondeo.js` (salida en `evidencias/exploracion-redondeo.txt`), que compara cuatro técnicas usando como esperado el redondeo al centavo más cercano, con los empates (,xx5) hacia arriba:
+
+| Técnica | Valores puntuales correctos | Fallos en el barrido de 10 000 000 empates (0,005 a 99 999,995) | Ejemplo de fallo |
+|---|---|---|---|
+| A: `Math.round(x * 100) / 100` | 7 de 10 | 587 204 | 1,005 da 1 |
+| B: `Math.round((x + Number.EPSILON) * 100) / 100` | 8 de 10 | 587 189 | 2,135 da 2,13 |
+| C: `Number(x.toFixed(2))` | 6 de 10 | 4 800 000 | 2,675 da 2,67 |
+| D: `Math.round(Number((x * 100).toPrecision(15))) / 100` | 10 de 10 | 0 | - |
+
+Conclusiones:
+
+- Las cuatro técnicas resuelven CP-07 y CP-08. **Si me hubiera quedado solo con los casos de la matriz, cualquiera parecería correcta.**
+- La técnica A, la más común, falla en el 5,9 % de los empates, porque números como 1,005 se guardan en binario como 1,00499999…
+- La técnica B, que se recomienda mucho, solo corrige los importes menores que 2. `Number.EPSILON` es un margen relativo a 1, y en importes mayores se pierde.
+- La técnica D primero limpia el error de representación, quedándose con 15 cifras significativas, y después redondea. No falló en ningún empate del barrido. **Es la que voy a usar.**
+
+Limitación: `toPrecision(15)` deja de ser fiable con importes de más de 15 cifras significativas en centavos (alrededor de 10¹³ USD). Es un valor muy lejano a cualquier compra real, pero lo anoto como riesgo residual.
+
 ## Plan de corrección
 
 Corrijo los defectos de a uno, cada uno en su propio commit. Después de cada corrección vuelvo a ejecutar toda la suite, para confirmar que los casos del defecto ahora pasan (confirmación) y que los que ya pasaban siguen pasando (regresión). No modifico ni los requisitos ni las pruebas para que el código pase.
 
-El orden lo decido por severidad: **DEF-02 → DEF-03 → DEF-01**.
+El orden lo decido por severidad: **DEF-02 → DEF-03 → DEF-01**. DEF-04 se agregó después y se corrige al final, porque la corrección de DEF-01 cambia el valor que devuelve CP-20 (de un residuo a `-0`) y conviene ver ese efecto antes de corregirlo.
 
 Antes de corregir dejo anotado qué espero que ocurra en la primera corrección. Si solo agrego la validación de rango, sin la de tipo, algunos casos de DEF-03 deberían seguir fallando, pero por otra razón:
 

@@ -23,6 +23,8 @@ Para cada parámetro separé las clases de valores que el módulo debería trata
 
 Para el resultado también separé dos clases: **T-1**, un total exacto que no necesita redondeo, y **T-2**, un total con más de dos decimales que sí necesita redondeo (RF-03).
 
+Después de la ejecución inicial agregué una tercera clase de salida: **T-3**, descuento del 100 % sobre un subtotal que no se representa de forma exacta en binario. Esta clase la encontré en la prueba exploratoria del redondeo (DEF-04). CP-06 pertenece a T-1, porque 19,99 × 3 sí da un resultado exacto, así que no la cubría.
+
 ## 2. Valores límite
 
 | Parámetro | Último valor inválido | Primer valor válido | Último valor válido | Primer valor inválido |
@@ -63,8 +65,9 @@ Para el descuento uso un paso de 0,01 (supuesto A-05). La cantidad la pruebo con
 | CP-18 | RF-05 | Partición C-I3: cantidad `Infinity` | Negativo | (100, Infinity, 10) | Lanza `TypeError` | Media | Pasa (DEF-03 corregido) |
 | CP-19 | RF-05 (frente a RF-04) | Partición D-I4: descuento `-Infinity`, precedencia del tipo sobre el rango (A-04) | Negativo | (100, 2, -Infinity) | Lanza `TypeError`, no `RangeError` | Media | Pasa (DEF-03 corregido) |
 | PR-01 | RNF-01 | Medición exploratoria del tiempo de ejecución | No funcional | 10 000 llamadas con datos válidos, repetidas varias veces después de un calentamiento | Informar la mediana y el percentil 95 del tiempo por llamada y compararlos con la referencia S-01 de la Unidad 1 (≤ 1 ms en el 95 %), que no está aprobada | Baja | Pendiente (Fase D) |
+| CP-20 | RF-03 | Partición de salida T-3 (agregado tras la exploración del redondeo) | Borde | (0.07, 3, 100) | `0`, ni un residuo ni `-0` | Alta | Falla (DEF-04) |
 
-Los casos CP-01 a CP-19 se automatizan con Jest en `tests/compras.test.js`. PR-01 se ejecuta con un script aparte, porque una medición de tiempo dentro de la suite haría que el resultado de las pruebas dependiera de la carga de la máquina.
+Los casos CP-01 a CP-20 se automatizan con Jest en `tests/compras.test.js`. CP-20 no estaba en el diseño original: lo agregué después de la ejecución inicial, cuando la prueba exploratoria del redondeo mostró que el 100 % de descuento no siempre produce 0. PR-01 se ejecuta con un script aparte, porque una medición de tiempo dentro de la suite haría que el resultado de las pruebas dependiera de la carga de la máquina.
 
 ## 4. Trazabilidad requisito-caso
 
@@ -72,7 +75,7 @@ Los casos CP-01 a CP-19 se automatizan con Jest en `tests/compras.test.js`. PR-0
 |---|---|---|---|
 | RF-01 | CP-01, CP-02, CP-03, CP-04 | - | 4 |
 | RF-02 | CP-01, CP-02, CP-05, CP-06 | - | 4 |
-| RF-03 | CP-06, CP-07, CP-08 | - | 3 |
+| RF-03 | CP-06, CP-07, CP-08, CP-20 | - | 4 |
 | RF-04 | - | CP-09, CP-10, CP-11, CP-12, CP-13 | 5 |
 | RF-05 | - | CP-14, CP-15, CP-16, CP-17, CP-18, CP-19 | 6 |
 | RNF-01 | PR-01 | - | 1 |
@@ -86,5 +89,8 @@ Todos los requisitos tienen al menos un caso. Las clases inválidas (P-I1 a D-I4
 | Inicial | Código del enunciado, sin cambios (`373d625`) | 6 (CP-01 a CP-06) | 13 (CP-07 a CP-19) | `evidencias/pruebas-iniciales.txt` y `evidencias/resultados-reales-iniciales.txt` |
 | Corrección 1 | Validación de rango (DEF-02) | 11 (CP-01 a CP-06, CP-09 a CP-13) | 8 (CP-07, CP-08, CP-14 a CP-19) | `evidencias/pruebas-correccion-DEF-02.txt` |
 | Corrección 2 | Validación de tipo antes del rango (DEF-03) | 17 (CP-01 a CP-06, CP-09 a CP-19) | 2 (CP-07, CP-08) | `evidencias/pruebas-correccion-DEF-03.txt` |
+| Nuevo caso CP-20 | Igual que en la corrección 2: solo se agregó el caso | 17 de 20 | 3 (CP-07, CP-08, CP-20) | `evidencias/pruebas-caso-CP-20.txt` |
 
-La columna "Estado" de la sección 3 muestra el resultado de la última ejecución. Los casos que pasan en la ejecución inicial son todos los que usan datos válidos y no necesitan redondeo. Fallan todos los de redondeo y todos los de datos inválidos. Confirmé las 13 fallas reproduciéndolas fuera de Jest y las agrupé en tres defectos según su causa: DEF-01, DEF-02 y DEF-03, en [defectos.md](defectos.md).
+La columna "Estado" de la sección 3 muestra el resultado de la última ejecución. Los casos que pasan en la ejecución inicial son todos los que usan datos válidos y no necesitan redondeo. Fallan todos los de redondeo y todos los de datos inválidos. Confirmé las 13 fallas reproduciéndolas fuera de Jest y las agrupé en tres defectos según su causa: DEF-01, DEF-02 y DEF-03, en [defectos.md](defectos.md). El cuarto defecto, DEF-04, apareció después, con CP-20.
+
+CP-06 pasó en todas las ejecuciones y aun así el requisito que verifica tenía un defecto. Su dato (19,99 × 3) resultó exacto por casualidad. Es un ejemplo concreto de que una prueba que pasa no demuestra que no haya defectos: solo informa sobre los datos que se usaron.

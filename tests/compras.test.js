@@ -23,6 +23,9 @@ describe('RF-03: total con dos decimales', () => {
     { id: 'CP-06', datos: [19.99, 3, 100], esperado: 0, detalle: 'descuento 100 % produce 0' },
     { id: 'CP-07', datos: [19.99, 3, 15], esperado: 50.97, detalle: 'redondeo de 50,9745' },
     { id: 'CP-08', datos: [0.1, 3, 0], esperado: 0.3, detalle: 'error de punto flotante' },
+    // CP-20 se agregó después de la ejecución inicial: salió de la exploración del redondeo (DEF-04).
+    // toBe usa Object.is, así que también detecta si se devuelve -0 en lugar de 0.
+    { id: 'CP-20', datos: [0.07, 3, 100], esperado: 0, detalle: 'descuento 100 % con subtotal inexacto produce 0' },
   ])('$id: $detalle -> $esperado', ({ datos, esperado }) => {
     expect(calcularTotal(...datos)).toBe(esperado);
   });

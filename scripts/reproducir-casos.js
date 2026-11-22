@@ -26,6 +26,7 @@ const casos = [
   ['CP-17', [NaN, 2, 10], 'TypeError'],
   ['CP-18', [100, Infinity, 10], 'TypeError'],
   ['CP-19', [100, 2, -Infinity], 'TypeError'],
+  ['CP-20', [0.07, 3, 100], '0'],
 ];
 
 // Muestra los datos de forma legible: los textos entre comillas y el resto tal cual.
@@ -41,7 +42,9 @@ let coinciden = 0;
 for (const [id, datos, esperado] of casos) {
   let real;
   try {
-    real = String(calcularTotal(...datos));
+    const valor = calcularTotal(...datos);
+    // String(-0) da "0", así que el -0 se muestra aparte para no ocultarlo.
+    real = Object.is(valor, -0) ? '-0' : String(valor);
   } catch (error) {
     real = `${error.name}: ${error.message}`;
   }

@@ -1,0 +1,64 @@
+Node.js v18.19.1
+
+Valor 50.9745 (CP-07: 19,99 × 3 con 15 %); esperado 50.97
+  A: Math.round(x*100)/100     -> 50.97      OK
+  B: con Number.EPSILON        -> 50.97      OK
+  C: Number(x.toFixed(2))      -> 50.97      OK
+  D: toPrecision(15)           -> 50.97      OK
+Valor 0.30000000000000004 (CP-08: 0,1 × 3); esperado 0.3
+  A: Math.round(x*100)/100     -> 0.3        OK
+  B: con Number.EPSILON        -> 0.3        OK
+  C: Number(x.toFixed(2))      -> 0.3        OK
+  D: toPrecision(15)           -> 0.3        OK
+Valor 1.005 (empate ,xx5); esperado 1.01
+  A: Math.round(x*100)/100     -> 1          DIFERENTE
+  B: con Number.EPSILON        -> 1.01       OK
+  C: Number(x.toFixed(2))      -> 1          DIFERENTE
+  D: toPrecision(15)           -> 1.01       OK
+Valor 2.675 (empate ,xx5); esperado 2.68
+  A: Math.round(x*100)/100     -> 2.68       OK
+  B: con Number.EPSILON        -> 2.68       OK
+  C: Number(x.toFixed(2))      -> 2.67       DIFERENTE
+  D: toPrecision(15)           -> 2.68       OK
+Valor 2.135 (empate ,xx5); esperado 2.14
+  A: Math.round(x*100)/100     -> 2.13       DIFERENTE
+  B: con Number.EPSILON        -> 2.13       DIFERENTE
+  C: Number(x.toFixed(2))      -> 2.13       DIFERENTE
+  D: toPrecision(15)           -> 2.14       OK
+Valor 4.015 (empate ,xx5); esperado 4.02
+  A: Math.round(x*100)/100     -> 4.01       DIFERENTE
+  B: con Number.EPSILON        -> 4.01       DIFERENTE
+  C: Number(x.toFixed(2))      -> 4.01       DIFERENTE
+  D: toPrecision(15)           -> 4.02       OK
+Valor 8.345 (empate ,xx5); esperado 8.35
+  A: Math.round(x*100)/100     -> 8.35       OK
+  B: con Number.EPSILON        -> 8.35       OK
+  C: Number(x.toFixed(2))      -> 8.35       OK
+  D: toPrecision(15)           -> 8.35       OK
+Valor 1234.005 (empate ,xx5 con un importe mayor); esperado 1234.01
+  A: Math.round(x*100)/100     -> 1234.01    OK
+  B: con Number.EPSILON        -> 1234.01    OK
+  C: Number(x.toFixed(2))      -> 1234.01    OK
+  D: toPrecision(15)           -> 1234.01    OK
+Valor 44.9775 (19,99 × 3 con 25 % = 44,9775); esperado 44.98
+  A: Math.round(x*100)/100     -> 44.98      OK
+  B: con Number.EPSILON        -> 44.98      OK
+  C: Number(x.toFixed(2))      -> 44.98      OK
+  D: toPrecision(15)           -> 44.98      OK
+Valor 0 (descuento 100 %); esperado 0
+  A: Math.round(x*100)/100     -> 0          OK
+  B: con Number.EPSILON        -> 0          OK
+  C: Number(x.toFixed(2))      -> 0          OK
+  D: toPrecision(15)           -> 0          OK
+
+Resumen de aciertos:
+  A: Math.round(x*100)/100     7 de 10
+  B: con Number.EPSILON        8 de 10
+  C: Number(x.toFixed(2))      6 de 10
+  D: toPrecision(15)           10 de 10
+
+Barrido de 10000000 empates (0,005 a 99 999,995):
+  A: Math.round(x*100)/100     587204 fallos (por ejemplo: 0.145, 0.285, 0.565)
+  B: con Number.EPSILON        587189 fallos (por ejemplo: 2.135, 2.175, 2.385)
+  C: Number(x.toFixed(2))      4800000 fallos (por ejemplo: 0.015, 0.045, 0.075)
+  D: toPrecision(15)           0 fallos
