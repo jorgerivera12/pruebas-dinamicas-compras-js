@@ -23,7 +23,7 @@ La ejecución inicial con Jest dio 13 casos fallidos (`evidencias/pruebas-inicia
 | ID | Título | Requisito | Casos que fallan | Severidad | Prioridad | Estado |
 |---|---|---|---|---|---|---|
 | DEF-01 | El total no se redondea a dos decimales | RF-03 | CP-07, CP-08 | Media | Alta | Abierto |
-| DEF-02 | No se rechazan valores fuera de rango y el total puede quedar negativo | RF-04 | CP-09 a CP-13 | Alta | Alta | Abierto |
+| DEF-02 | No se rechazan valores fuera de rango y el total puede quedar negativo | RF-04 | CP-09 a CP-13 | Alta | Alta | Corregido y verificado |
 | DEF-03 | No se rechazan entradas no numéricas ni no finitas | RF-05 | CP-14 a CP-19 | Alta | Alta | Abierto |
 
 ## DEF-01: el total no se redondea a dos decimales
@@ -55,7 +55,7 @@ La ejecución inicial con Jest dio 13 casos fallidos (`evidencias/pruebas-inicia
 | Prioridad | **Alta.** Bloquea la liberación: es el mismo riesgo económico que en la Unidad 1 identifiqué como el más costoso (R-03, total negativo). |
 | Causa probable | La función no valida ningún rango. Aplica la fórmula a cualquier número. |
 | Evidencia | `evidencias/pruebas-iniciales.txt` ("Received function did not throw") y `evidencias/resultados-reales-iniciales.txt` |
-| Estado | Abierto |
+| Estado | Corregido y verificado (ver "Seguimiento de las correcciones"). |
 
 | Caso | Datos | Resultado real | Problema |
 |---|---|---|---|
@@ -100,3 +100,25 @@ Antes de corregir dejo anotado qué espero que ocurra en la primera corrección.
 - CP-19: `-Infinity < 0` es `true`, así que también lanzaría `RangeError`.
 
 Si eso ocurre, confirma la decisión A-04 del plan: la validación de tipo tiene que hacerse antes que la de rango.
+
+## Seguimiento de las correcciones
+
+### Corrección 1: DEF-02
+
+**Cambio en `src/compras.js`.** Antes del cálculo agregué tres validaciones que lanzan `RangeError`:
+
+- `precio < 0`
+- `cantidad <= 0`
+- `descuento < 0 || descuento > 100`
+
+Las comparaciones respetan los límites de RF-04 tal como están escritos: el precio 0, la cantidad 1 y los descuentos 0 y 100 siguen siendo válidos. No toqué el cálculo ni las pruebas.
+
+**Resultado de la regresión completa:** pasan 11 y fallan 8 (antes pasaban 6 y fallaban 13). Evidencias: `evidencias/pruebas-correccion-DEF-02.txt` y `npm run reproducir`.
+
+| Tipo de verificación | Casos | Resultado |
+|---|---|---|
+| Confirmación de DEF-02 | CP-09 a CP-13 | Los 5 pasan: lanzan `RangeError` con un mensaje que indica cuál dato está fuera de rango. |
+| Regresión | CP-01 a CP-06 | Los 6 siguen pasando. Los límites válidos (CP-03 con precio 0, CP-04 con cantidad 1, CP-05 con descuento 0 y CP-06 con descuento 100) no se rompieron. |
+| Defectos todavía abiertos | CP-07, CP-08 (DEF-01) y CP-14 a CP-19 (DEF-03) | Siguen fallando, como era de esperar. |
+
+**Se cumplió la predicción.** CP-15 y CP-19 cambiaron de comportamiento. Antes devolvían un número; ahora lanzan `RangeError`. Jest lo muestra así: "Expected constructor: TypeError / Received constructor: RangeError". Esto confirma que, con solo la validación de rango, `null` se trata como 0 y `-Infinity` como un número negativo. CP-14 (`"100"`), CP-16 (`undefined`), CP-17 (`NaN`) y CP-18 (`Infinity`) siguen devolviendo un valor, porque las comparaciones con esos datos dan `false` y ninguna validación se activa. La conclusión es que validar el rango no reemplaza a validar el tipo, y que el tipo hay que comprobarlo primero (A-04).

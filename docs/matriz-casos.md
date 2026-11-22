@@ -51,17 +51,17 @@ Para el descuento uso un paso de 0,01 (supuesto A-05). La cantidad la pruebo con
 | CP-06 | RF-02, RF-03 | Valor límite: descuento = 100 | Borde | (19.99, 3, 100) | `0` | Alta | Pasa |
 | CP-07 | RF-03 | Partición de salida T-2 (redondeo) | Positivo | (19.99, 3, 15) | `50.97` (el valor exacto es 50,9745) | Alta | Falla (DEF-01) |
 | CP-08 | RF-03 | Partición de salida T-2 (error de punto flotante) | Positivo | (0.1, 3, 0) | `0.3` | Media | Falla (DEF-01) |
-| CP-09 | RF-04 | Valor límite: precio = -0,01 (P-I1) | Negativo / borde | (-0.01, 1, 0) | Lanza `RangeError` | Alta | Falla (DEF-02) |
-| CP-10 | RF-04 | Valor límite: cantidad = 0 (C-I1) | Negativo / borde | (10, 0, 0) | Lanza `RangeError` | Alta | Falla (DEF-02) |
-| CP-11 | RF-04 | Partición C-I1: cantidad negativa | Negativo | (10, -2, 0) | Lanza `RangeError` | Alta | Falla (DEF-02) |
-| CP-12 | RF-04 | Valor límite: descuento = -0,01 (D-I1) | Negativo / borde | (100, 1, -0.01) | Lanza `RangeError` | Alta | Falla (DEF-02) |
-| CP-13 | RF-04 | Valor límite: descuento = 100,01 (D-I2) | Negativo / borde | (100, 1, 100.01) | Lanza `RangeError` | Alta | Falla (DEF-02) |
+| CP-09 | RF-04 | Valor límite: precio = -0,01 (P-I1) | Negativo / borde | (-0.01, 1, 0) | Lanza `RangeError` | Alta | Pasa (DEF-02 corregido) |
+| CP-10 | RF-04 | Valor límite: cantidad = 0 (C-I1) | Negativo / borde | (10, 0, 0) | Lanza `RangeError` | Alta | Pasa (DEF-02 corregido) |
+| CP-11 | RF-04 | Partición C-I1: cantidad negativa | Negativo | (10, -2, 0) | Lanza `RangeError` | Alta | Pasa (DEF-02 corregido) |
+| CP-12 | RF-04 | Valor límite: descuento = -0,01 (D-I1) | Negativo / borde | (100, 1, -0.01) | Lanza `RangeError` | Alta | Pasa (DEF-02 corregido) |
+| CP-13 | RF-04 | Valor límite: descuento = 100,01 (D-I2) | Negativo / borde | (100, 1, 100.01) | Lanza `RangeError` | Alta | Pasa (DEF-02 corregido) |
 | CP-14 | RF-05 | Partición P-I2: precio como texto | Negativo | ("100", 2, 10) | Lanza `TypeError` | Alta | Falla (DEF-03) |
-| CP-15 | RF-05 | Partición C-I2: cantidad `null` | Negativo | (100, null, 10) | Lanza `TypeError` | Alta | Falla (DEF-03) |
+| CP-15 | RF-05 | Partición C-I2: cantidad `null` | Negativo | (100, null, 10) | Lanza `TypeError` | Alta | Falla (DEF-03): lanza RangeError |
 | CP-16 | RF-05 | Partición D-I3: descuento `undefined` (argumento omitido) | Negativo | (100, 2, undefined) | Lanza `TypeError` | Media | Falla (DEF-03) |
 | CP-17 | RF-05 | Partición P-I3: precio `NaN` | Negativo | (NaN, 2, 10) | Lanza `TypeError` | Alta | Falla (DEF-03) |
 | CP-18 | RF-05 | Partición C-I3: cantidad `Infinity` | Negativo | (100, Infinity, 10) | Lanza `TypeError` | Media | Falla (DEF-03) |
-| CP-19 | RF-05 (frente a RF-04) | Partición D-I4: descuento `-Infinity`, precedencia del tipo sobre el rango (A-04) | Negativo | (100, 2, -Infinity) | Lanza `TypeError`, no `RangeError` | Media | Falla (DEF-03) |
+| CP-19 | RF-05 (frente a RF-04) | Partición D-I4: descuento `-Infinity`, precedencia del tipo sobre el rango (A-04) | Negativo | (100, 2, -Infinity) | Lanza `TypeError`, no `RangeError` | Media | Falla (DEF-03): lanza RangeError |
 | PR-01 | RNF-01 | Medición exploratoria del tiempo de ejecución | No funcional | 10 000 llamadas con datos válidos, repetidas varias veces después de un calentamiento | Informar la mediana y el percentil 95 del tiempo por llamada y compararlos con la referencia S-01 de la Unidad 1 (≤ 1 ms en el 95 %), que no está aprobada | Baja | Pendiente (Fase D) |
 
 Los casos CP-01 a CP-19 se automatizan con Jest en `tests/compras.test.js`. PR-01 se ejecuta con un script aparte, porque una medición de tiempo dentro de la suite haría que el resultado de las pruebas dependiera de la carga de la máquina.
@@ -84,5 +84,6 @@ Todos los requisitos tienen al menos un caso. Las clases inválidas (P-I1 a D-I4
 | Ejecución | Versión del código | Pasan | Fallan | Evidencia |
 |---|---|---|---|---|
 | Inicial | Código del enunciado, sin cambios (`373d625`) | 6 (CP-01 a CP-06) | 13 (CP-07 a CP-19) | `evidencias/pruebas-iniciales.txt` y `evidencias/resultados-reales-iniciales.txt` |
+| Corrección 1 | Validación de rango (DEF-02) | 11 (CP-01 a CP-06, CP-09 a CP-13) | 8 (CP-07, CP-08, CP-14 a CP-19) | `evidencias/pruebas-correccion-DEF-02.txt` |
 
 La columna "Estado" de la sección 3 muestra el resultado de la última ejecución. Los casos que pasan en la ejecución inicial son todos los que usan datos válidos y no necesitan redondeo. Fallan todos los de redondeo y todos los de datos inválidos. Confirmé las 13 fallas reproduciéndolas fuera de Jest y las agrupé en tres defectos según su causa: DEF-01, DEF-02 y DEF-03, en [defectos.md](defectos.md).
