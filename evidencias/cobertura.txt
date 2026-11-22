@@ -1,0 +1,41 @@
+
+> pruebas-dinamicas-compras-js@1.0.0 test:coverage
+> jest --runInBand --coverage
+
+PASS tests/compras.test.js
+  RF-01 y RF-02: cálculo del total con datos válidos
+    ✓ CP-01: caso nominal -> 90 (6 ms)
+    ✓ CP-02: precio con decimales -> 30
+    ✓ CP-03: límite precio = 0 (A-01) -> 0 (1 ms)
+    ✓ CP-04: límite cantidad = 1 -> 49.99 (1 ms)
+    ✓ CP-05: límite descuento = 0 -> 160 (1 ms)
+  RF-03: total con dos decimales
+    ✓ CP-06: descuento 100 % produce 0 -> 0
+    ✓ CP-07: redondeo de 50,9745 -> 50.97
+    ✓ CP-08: error de punto flotante -> 0.3 (1 ms)
+    ✓ CP-20: descuento 100 % con subtotal inexacto produce 0 -> 0 (1 ms)
+  RF-04: RangeError para valores fuera de rango
+    ✓ CP-09: precio = -0,01 -> RangeError (3 ms)
+    ✓ CP-10: cantidad = 0 -> RangeError (1 ms)
+    ✓ CP-11: cantidad negativa -> RangeError (1 ms)
+    ✓ CP-12: descuento = -0,01 -> RangeError (1 ms)
+    ✓ CP-13: descuento = 100,01 -> RangeError (1 ms)
+  RF-05: TypeError para entradas no numéricas o no finitas
+    ✓ CP-14: precio como texto -> TypeError (1 ms)
+    ✓ CP-15: cantidad null -> TypeError (1 ms)
+    ✓ CP-16: descuento undefined -> TypeError (1 ms)
+    ✓ CP-17: precio NaN -> TypeError
+    ✓ CP-18: cantidad Infinity -> TypeError (1 ms)
+    ✓ CP-19: descuento -Infinity (tipo antes que rango, A-04) -> TypeError (1 ms)
+
+------------|---------|----------|---------|---------|-------------------
+File        | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s 
+------------|---------|----------|---------|---------|-------------------
+All files   |     100 |      100 |     100 |     100 |                   
+ compras.js |     100 |      100 |     100 |     100 |                   
+------------|---------|----------|---------|---------|-------------------
+Test Suites: 1 passed, 1 total
+Tests:       20 passed, 20 total
+Snapshots:   0 total
+Time:        0.65 s, estimated 1 s
+Ran all test suites.

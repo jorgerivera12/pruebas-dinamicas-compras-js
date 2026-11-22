@@ -25,7 +25,7 @@ La ejecución inicial con Jest dio 13 casos fallidos (`evidencias/pruebas-inicia
 | DEF-01 | El total no se redondea a dos decimales | RF-03 | CP-07, CP-08 | Media | Alta | Corregido y verificado |
 | DEF-02 | No se rechazan valores fuera de rango y el total puede quedar negativo | RF-04 | CP-09 a CP-13 | Alta | Alta | Corregido y verificado |
 | DEF-03 | No se rechazan entradas no numéricas ni no finitas | RF-05 | CP-14 a CP-19 | Alta | Alta | Corregido y verificado |
-| DEF-04 | El 100 % de descuento no siempre produce 0 | RF-03 | CP-20 (agregado después) | Media | Media | Abierto |
+| DEF-04 | El 100 % de descuento no siempre produce 0 | RF-03 | CP-20 (agregado después) | Media | Media | Corregido y verificado |
 
 ## DEF-01: el total no se redondea a dos decimales
 
@@ -106,7 +106,7 @@ Este defecto no salió de la ejecución inicial. Lo encontré después de correg
 | Causa probable | La fórmula `subtotal - subtotal * descuento / 100` hace dos operaciones con redondeo binario. Con descuento 100, `subtotal * 100 / 100` no siempre vuelve a dar exactamente `subtotal` (0,07 × 3 = 0,21000000000000002), y la resta deja un residuo. Revisé subtotales de 0,01 a 99 999,99 con cantidades 1, 3 y 7, y el residuo aparece en 2 899 312 de 29 999 997 combinaciones. |
 | Por qué CP-06 no lo detectó | 19,99 × 3 da un subtotal que se representa de forma exacta en binario. El caso de prueba pasaba, pero el requisito no se cumplía para otros datos. |
 | Evidencia | `evidencias/pruebas-caso-CP-20.txt` (Expected 0 / Received -2.7755575615628914e-17) y `npm run reproducir` |
-| Estado | Abierto |
+| Estado | Corregido y verificado (ver "Seguimiento de las correcciones"). |
 
 **Por qué es un defecto aparte de DEF-01.** Las dos causas tienen que ver con el punto flotante, pero redondear no lo resuelve. Lo comprobé: al aplicar a ese residuo el redondeo elegido para DEF-01, el resultado es `-0`, que sigue mostrándose como "$-0,00" y que `toBe(0)` (igualdad `Object.is`) distingue de `0`. Por eso necesita su propia corrección.
 
@@ -194,3 +194,39 @@ Elegí `Number.isFinite` en lugar de la función global `isFinite` por una razó
 | Defecto todavía abierto | CP-20 (DEF-04) | Sigue fallando. |
 
 **Se cumplió la predicción sobre CP-20.** Pasó de recibir `-2.7755575615628914e-17` a recibir `-0`. Jest lo muestra así: "Expected: 0 / Received: -0". Esto confirma lo que anoté al registrar DEF-04: el redondeo elimina el residuo pero conserva el signo negativo, así que DEF-04 necesita una corrección en el cálculo y no en el redondeo.
+
+### Corrección 4: DEF-04
+
+**Cambio en `src/compras.js`.** Reemplacé `subtotal - subtotal * descuento / 100` por `subtotal * (100 - descuento) / 100`. Matemáticamente las dos expresiones son iguales. La diferencia es numérica: con descuento 100 el factor `(100 - descuento)` vale exactamente 0, y cualquier subtotal finito multiplicado por 0 da 0, así que no queda ningún residuo. Además, la nueva fórmula ya no resta dos números parecidos, que es lo que hacía perder precisión a la anterior.
+
+**Regresión ampliada antes de aceptar el cambio.** Cambiar una fórmula puede alterar totales que la suite no cubre. Por eso, además de los 20 casos, comparé las dos fórmulas con el mismo redondeo contra una referencia exacta calculada con enteros (`BigInt`). Usé 4 000 000 de combinaciones: precios de 0,00 a 999,99, cantidades 1, 2, 3, 7 y 12, y descuentos 0, 5, 12,5, 15, 33,33, 50, 99,99 y 100. El script es `scripts/comparar-formulas.js` y la salida está en `evidencias/comparacion-formulas.txt`.
+
+| Fórmula | Diferencias con la referencia exacta | Detalle |
+|---|---|---|
+| Anterior | 21 286 | 21 246 dan `-0` con descuento 100 (DEF-04). Las otras 40 se equivocan en un centavo en los empates: por ejemplo, `(12.5, 12, 99.99)` da 0,01 cuando el valor exacto 0,015 debía redondearse a 0,02. |
+| Nueva | **0** | Coincide en todas las combinaciones. |
+
+Así confirmé que el cambio no rompe ningún total y que además corrige 40 errores de un centavo que ningún caso de la matriz detectaba.
+
+**Resultado de la regresión final:** pasan 20 y no falla ninguno. Evidencias: `evidencias/pruebas-finales.txt` y `evidencias/resultados-reales-finales.txt`.
+
+| Tipo de verificación | Casos | Resultado |
+|---|---|---|
+| Confirmación de DEF-04 | CP-20 | Pasa: devuelve `0` (no `-0`). |
+| Regresión completa | CP-01 a CP-19 | Los 19 siguen pasando, incluidas las confirmaciones de DEF-01, DEF-02 y DEF-03. |
+| Regresión ampliada | 4 000 000 de combinaciones | 0 diferencias con la referencia exacta. |
+
+## Cierre de la gestión de defectos
+
+| Ejecución | Pasan | Fallan | Evidencia |
+|---|---|---|---|
+| Inicial (código del enunciado) | 6 de 19 | 13 | `evidencias/pruebas-iniciales.txt` |
+| Corrección 1 (DEF-02) | 11 de 19 | 8 | `evidencias/pruebas-correccion-DEF-02.txt` |
+| Corrección 2 (DEF-03) | 17 de 19 | 2 | `evidencias/pruebas-correccion-DEF-03.txt` |
+| Nuevo caso CP-20 (sin cambios en el código) | 17 de 20 | 3 | `evidencias/pruebas-caso-CP-20.txt` |
+| Corrección 3 (DEF-01) | 19 de 20 | 1 | `evidencias/pruebas-correccion-DEF-01.txt` |
+| Corrección 4 (DEF-04), regresión final | **20 de 20** | **0** | `evidencias/pruebas-finales.txt` |
+
+Los cuatro defectos están corregidos y verificados. En ninguna corrección cambié un requisito ni el resultado esperado de una prueba. Solo agregué un caso, CP-20, y fue para hacer la suite más estricta, no para que pasara. Cada corrección quedó en su propio commit, con la evidencia de su ejecución.
+
+**Cobertura de código:** `npm run test:coverage` da 100 % de sentencias, ramas, funciones y líneas (`evidencias/cobertura.txt`). Hay que leer este dato con cuidado. El código del enunciado tampoco tenía ramas, así que CP-01 por sí solo ya lo habría cubierto al 100 %, y aun así contenía los cuatro defectos. DEF-04, en concreto, estaba en una línea que se ejecutaba en todas las pruebas. La cobertura dice qué código se ejecutó, no si el resultado era correcto. Por eso el criterio principal de este trabajo es la cobertura por requisito de la matriz.

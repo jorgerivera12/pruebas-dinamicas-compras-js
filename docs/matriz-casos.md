@@ -64,8 +64,8 @@ Para el descuento uso un paso de 0,01 (supuesto A-05). La cantidad la pruebo con
 | CP-17 | RF-05 | Partición P-I3: precio `NaN` | Negativo | (NaN, 2, 10) | Lanza `TypeError` | Alta | Pasa (DEF-03 corregido) |
 | CP-18 | RF-05 | Partición C-I3: cantidad `Infinity` | Negativo | (100, Infinity, 10) | Lanza `TypeError` | Media | Pasa (DEF-03 corregido) |
 | CP-19 | RF-05 (frente a RF-04) | Partición D-I4: descuento `-Infinity`, precedencia del tipo sobre el rango (A-04) | Negativo | (100, 2, -Infinity) | Lanza `TypeError`, no `RangeError` | Media | Pasa (DEF-03 corregido) |
+| CP-20 | RF-03 | Partición de salida T-3 (agregado tras la exploración del redondeo) | Borde | (0.07, 3, 100) | `0`, ni un residuo ni `-0` | Alta | Pasa (DEF-04 corregido) |
 | PR-01 | RNF-01 | Medición exploratoria del tiempo de ejecución | No funcional | 10 000 llamadas con datos válidos, repetidas varias veces después de un calentamiento | Informar la mediana y el percentil 95 del tiempo por llamada y compararlos con la referencia S-01 de la Unidad 1 (≤ 1 ms en el 95 %), que no está aprobada | Baja | Pendiente (Fase D) |
-| CP-20 | RF-03 | Partición de salida T-3 (agregado tras la exploración del redondeo) | Borde | (0.07, 3, 100) | `0`, ni un residuo ni `-0` | Alta | Falla (DEF-04): devuelve -0 |
 
 Los casos CP-01 a CP-20 se automatizan con Jest en `tests/compras.test.js`. CP-20 no estaba en el diseño original: lo agregué después de la ejecución inicial, cuando la prueba exploratoria del redondeo mostró que el 100 % de descuento no siempre produce 0. PR-01 se ejecuta con un script aparte, porque una medición de tiempo dentro de la suite haría que el resultado de las pruebas dependiera de la carga de la máquina.
 
@@ -91,6 +91,7 @@ Todos los requisitos tienen al menos un caso. Las clases inválidas (P-I1 a D-I4
 | Corrección 2 | Validación de tipo antes del rango (DEF-03) | 17 (CP-01 a CP-06, CP-09 a CP-19) | 2 (CP-07, CP-08) | `evidencias/pruebas-correccion-DEF-03.txt` |
 | Nuevo caso CP-20 | Igual que en la corrección 2: solo se agregó el caso | 17 de 20 | 3 (CP-07, CP-08, CP-20) | `evidencias/pruebas-caso-CP-20.txt` |
 | Corrección 3 | Redondeo a centavos (DEF-01) | 19 de 20 | 1 (CP-20) | `evidencias/pruebas-correccion-DEF-01.txt` |
+| Corrección 4 (final) | Fórmula sin resta (DEF-04) | **20 de 20** | **0** | `evidencias/pruebas-finales.txt`, `evidencias/resultados-reales-finales.txt` y `evidencias/cobertura.txt` |
 
 La columna "Estado" de la sección 3 muestra el resultado de la última ejecución. Los casos que pasan en la ejecución inicial son todos los que usan datos válidos y no necesitan redondeo. Fallan todos los de redondeo y todos los de datos inválidos. Confirmé las 13 fallas reproduciéndolas fuera de Jest y las agrupé en tres defectos según su causa: DEF-01, DEF-02 y DEF-03, en [defectos.md](defectos.md). El cuarto defecto, DEF-04, apareció después, con CP-20.
 

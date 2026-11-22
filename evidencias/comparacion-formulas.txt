@@ -1,0 +1,10 @@
+Node.js v18.19.1
+Combinaciones: 4000000 (precios de 0,00 a 999,99; cantidades 1, 2, 3, 7, 12; descuentos 0, 5, 12.5, 15, 33.33, 50, 99.99, 100)
+
+Fórmula anterior: 21286 diferencias con la referencia exacta (21246 de ellas son -0)
+  (0.07, 3, 100) -> -0, esperado 0
+  (0.07, 12, 100) -> -0, esperado 0
+  (12.5, 12, 99.99) -> 0.01, esperado 0.02
+  (50, 3, 99.99) -> 0.01, esperado 0.02
+  (75, 2, 99.99) -> 0.01, esperado 0.02
+Fórmula nueva: 0 diferencias con la referencia exacta (0 de ellas son -0)

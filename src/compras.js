@@ -33,9 +33,12 @@ function calcularTotal(precio, cantidad, descuento) {
     throw new RangeError('El descuento debe estar entre 0 y 100');
   }
 
+  // RF-01 y RF-02. Se multiplica por el porcentaje que se paga en lugar de restar
+  // el descuento (DEF-04): con 100 % el factor es 0 y el total es exactamente 0,
+  // sin el residuo que dejaba la resta subtotal - subtotal * descuento / 100.
   const subtotal = precio * cantidad;
-  const valorDescuento = subtotal * descuento / 100;
-  return redondearCentavos(subtotal - valorDescuento);
+  const total = subtotal * (100 - descuento) / 100;
+  return redondearCentavos(total);
 }
 
 module.exports = { calcularTotal };
