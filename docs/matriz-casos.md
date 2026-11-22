@@ -51,8 +51,8 @@ Para el descuento uso un paso de 0,01 (supuesto A-05). La cantidad la pruebo con
 | CP-04 | RF-01 | Valor límite: cantidad = 1 | Borde | (49.99, 1, 0) | `49.99` | Media | Pasa |
 | CP-05 | RF-02 | Valor límite: descuento = 0 | Borde | (80, 2, 0) | `160` | Alta | Pasa |
 | CP-06 | RF-02, RF-03 | Valor límite: descuento = 100 | Borde | (19.99, 3, 100) | `0` | Alta | Pasa |
-| CP-07 | RF-03 | Partición de salida T-2 (redondeo) | Positivo | (19.99, 3, 15) | `50.97` (el valor exacto es 50,9745) | Alta | Falla (DEF-01) |
-| CP-08 | RF-03 | Partición de salida T-2 (error de punto flotante) | Positivo | (0.1, 3, 0) | `0.3` | Media | Falla (DEF-01) |
+| CP-07 | RF-03 | Partición de salida T-2 (redondeo) | Positivo | (19.99, 3, 15) | `50.97` (el valor exacto es 50,9745) | Alta | Pasa (DEF-01 corregido) |
+| CP-08 | RF-03 | Partición de salida T-2 (error de punto flotante) | Positivo | (0.1, 3, 0) | `0.3` | Media | Pasa (DEF-01 corregido) |
 | CP-09 | RF-04 | Valor límite: precio = -0,01 (P-I1) | Negativo / borde | (-0.01, 1, 0) | Lanza `RangeError` | Alta | Pasa (DEF-02 corregido) |
 | CP-10 | RF-04 | Valor límite: cantidad = 0 (C-I1) | Negativo / borde | (10, 0, 0) | Lanza `RangeError` | Alta | Pasa (DEF-02 corregido) |
 | CP-11 | RF-04 | Partición C-I1: cantidad negativa | Negativo | (10, -2, 0) | Lanza `RangeError` | Alta | Pasa (DEF-02 corregido) |
@@ -65,7 +65,7 @@ Para el descuento uso un paso de 0,01 (supuesto A-05). La cantidad la pruebo con
 | CP-18 | RF-05 | Partición C-I3: cantidad `Infinity` | Negativo | (100, Infinity, 10) | Lanza `TypeError` | Media | Pasa (DEF-03 corregido) |
 | CP-19 | RF-05 (frente a RF-04) | Partición D-I4: descuento `-Infinity`, precedencia del tipo sobre el rango (A-04) | Negativo | (100, 2, -Infinity) | Lanza `TypeError`, no `RangeError` | Media | Pasa (DEF-03 corregido) |
 | PR-01 | RNF-01 | Medición exploratoria del tiempo de ejecución | No funcional | 10 000 llamadas con datos válidos, repetidas varias veces después de un calentamiento | Informar la mediana y el percentil 95 del tiempo por llamada y compararlos con la referencia S-01 de la Unidad 1 (≤ 1 ms en el 95 %), que no está aprobada | Baja | Pendiente (Fase D) |
-| CP-20 | RF-03 | Partición de salida T-3 (agregado tras la exploración del redondeo) | Borde | (0.07, 3, 100) | `0`, ni un residuo ni `-0` | Alta | Falla (DEF-04) |
+| CP-20 | RF-03 | Partición de salida T-3 (agregado tras la exploración del redondeo) | Borde | (0.07, 3, 100) | `0`, ni un residuo ni `-0` | Alta | Falla (DEF-04): devuelve -0 |
 
 Los casos CP-01 a CP-20 se automatizan con Jest en `tests/compras.test.js`. CP-20 no estaba en el diseño original: lo agregué después de la ejecución inicial, cuando la prueba exploratoria del redondeo mostró que el 100 % de descuento no siempre produce 0. PR-01 se ejecuta con un script aparte, porque una medición de tiempo dentro de la suite haría que el resultado de las pruebas dependiera de la carga de la máquina.
 
@@ -90,6 +90,7 @@ Todos los requisitos tienen al menos un caso. Las clases inválidas (P-I1 a D-I4
 | Corrección 1 | Validación de rango (DEF-02) | 11 (CP-01 a CP-06, CP-09 a CP-13) | 8 (CP-07, CP-08, CP-14 a CP-19) | `evidencias/pruebas-correccion-DEF-02.txt` |
 | Corrección 2 | Validación de tipo antes del rango (DEF-03) | 17 (CP-01 a CP-06, CP-09 a CP-19) | 2 (CP-07, CP-08) | `evidencias/pruebas-correccion-DEF-03.txt` |
 | Nuevo caso CP-20 | Igual que en la corrección 2: solo se agregó el caso | 17 de 20 | 3 (CP-07, CP-08, CP-20) | `evidencias/pruebas-caso-CP-20.txt` |
+| Corrección 3 | Redondeo a centavos (DEF-01) | 19 de 20 | 1 (CP-20) | `evidencias/pruebas-correccion-DEF-01.txt` |
 
 La columna "Estado" de la sección 3 muestra el resultado de la última ejecución. Los casos que pasan en la ejecución inicial son todos los que usan datos válidos y no necesitan redondeo. Fallan todos los de redondeo y todos los de datos inválidos. Confirmé las 13 fallas reproduciéndolas fuera de Jest y las agrupé en tres defectos según su causa: DEF-01, DEF-02 y DEF-03, en [defectos.md](defectos.md). El cuarto defecto, DEF-04, apareció después, con CP-20.
 

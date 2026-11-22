@@ -22,7 +22,7 @@ La ejecución inicial con Jest dio 13 casos fallidos (`evidencias/pruebas-inicia
 
 | ID | Título | Requisito | Casos que fallan | Severidad | Prioridad | Estado |
 |---|---|---|---|---|---|---|
-| DEF-01 | El total no se redondea a dos decimales | RF-03 | CP-07, CP-08 | Media | Alta | Abierto |
+| DEF-01 | El total no se redondea a dos decimales | RF-03 | CP-07, CP-08 | Media | Alta | Corregido y verificado |
 | DEF-02 | No se rechazan valores fuera de rango y el total puede quedar negativo | RF-04 | CP-09 a CP-13 | Alta | Alta | Corregido y verificado |
 | DEF-03 | No se rechazan entradas no numéricas ni no finitas | RF-05 | CP-14 a CP-19 | Alta | Alta | Corregido y verificado |
 | DEF-04 | El 100 % de descuento no siempre produce 0 | RF-03 | CP-20 (agregado después) | Media | Media | Abierto |
@@ -40,7 +40,7 @@ La ejecución inicial con Jest dio 13 casos fallidos (`evidencias/pruebas-inicia
 | Prioridad | **Alta.** Afecta a cualquier compra con precios decimales, que son la mayoría. Además el requisito es explícito y corregirlo cuesta poco. |
 | Causa probable | La función devuelve `subtotal - valorDescuento` tal como lo calcula la aritmética de punto flotante (IEEE 754), sin ningún redondeo. El caso CP-08 muestra que el problema aparece incluso sin descuento: 0,1 no tiene una representación binaria exacta. |
 | Evidencia | `evidencias/pruebas-iniciales.txt` (CP-07 y CP-08, Expected/Received) y `evidencias/resultados-reales-iniciales.txt` |
-| Estado | Abierto |
+| Estado | Corregido y verificado (ver "Seguimiento de las correcciones"). |
 
 **Observación:** CP-06 (descuento 100 %) pasa en el código inicial. RF-03 se cumple solo en parte: el total con 100 % de descuento ya da 0, pero el redondeo no existe.
 
@@ -179,3 +179,18 @@ Elegí `Number.isFinite` en lugar de la función global `isFinite` por una razó
 | Precedencia del tipo sobre el rango (A-04) | CP-15, CP-19 | Ahora lanzan `TypeError`. En la corrección 1 lanzaban `RangeError`. |
 | Regresión | CP-01 a CP-13 | Siguen pasando, incluidas las 5 confirmaciones de DEF-02. |
 | Defecto todavía abierto | CP-07, CP-08 (DEF-01) | Siguen fallando, como era de esperar. |
+
+### Corrección 3: DEF-01
+
+**Cambio en `src/compras.js`.** Agregué la función `redondearCentavos(valor)` con la técnica D, elegida en la exploración del redondeo: `Math.round(Number((valor * 100).toPrecision(15))) / 100`. La aplico al valor que se devuelve. La fórmula del cálculo no cambia.
+
+**Resultado de la regresión completa:** pasan 19 y falla 1. Evidencias: `evidencias/pruebas-correccion-DEF-01.txt` y `npm run reproducir`.
+
+| Tipo de verificación | Casos | Resultado |
+|---|---|---|
+| Confirmación de DEF-01 | CP-07, CP-08 | Pasan: devuelven `50.97` y `0.3`. |
+| Regresión de los cálculos | CP-01 a CP-06 | Siguen pasando. El redondeo no cambió los totales que ya eran exactos. |
+| Regresión de las validaciones | CP-09 a CP-19 | Siguen pasando. Las validaciones van antes del cálculo, así que el redondeo no las afecta. |
+| Defecto todavía abierto | CP-20 (DEF-04) | Sigue fallando. |
+
+**Se cumplió la predicción sobre CP-20.** Pasó de recibir `-2.7755575615628914e-17` a recibir `-0`. Jest lo muestra así: "Expected: 0 / Received: -0". Esto confirma lo que anoté al registrar DEF-04: el redondeo elimina el residuo pero conserva el signo negativo, así que DEF-04 necesita una corrección en el cálculo y no en el redondeo.

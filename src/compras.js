@@ -8,6 +8,14 @@ function validarNumero(valor, nombre) {
   }
 }
 
+// RF-03: redondear al centavo más cercano (DEF-01).
+// toPrecision(15) elimina primero el error de representación binaria
+// (por ejemplo, 1.005 * 100 = 100.49999999999999 pasa a 100.5) y después Math.round
+// redondea al entero. La comparación de técnicas está en scripts/explorar-redondeo.js.
+function redondearCentavos(valor) {
+  return Math.round(Number((valor * 100).toPrecision(15))) / 100;
+}
+
 function calcularTotal(precio, cantidad, descuento) {
   // El tipo se valida antes que el rango (supuesto A-04 del plan de pruebas).
   validarNumero(precio, 'El precio');
@@ -27,7 +35,7 @@ function calcularTotal(precio, cantidad, descuento) {
 
   const subtotal = precio * cantidad;
   const valorDescuento = subtotal * descuento / 100;
-  return subtotal - valorDescuento;
+  return redondearCentavos(subtotal - valorDescuento);
 }
 
 module.exports = { calcularTotal };
