@@ -24,7 +24,7 @@ La ejecución inicial con Jest dio 13 casos fallidos (`evidencias/pruebas-inicia
 |---|---|---|---|---|---|---|
 | DEF-01 | El total no se redondea a dos decimales | RF-03 | CP-07, CP-08 | Media | Alta | Abierto |
 | DEF-02 | No se rechazan valores fuera de rango y el total puede quedar negativo | RF-04 | CP-09 a CP-13 | Alta | Alta | Corregido y verificado |
-| DEF-03 | No se rechazan entradas no numéricas ni no finitas | RF-05 | CP-14 a CP-19 | Alta | Alta | Abierto |
+| DEF-03 | No se rechazan entradas no numéricas ni no finitas | RF-05 | CP-14 a CP-19 | Alta | Alta | Corregido y verificado |
 
 ## DEF-01: el total no se redondea a dos decimales
 
@@ -77,7 +77,7 @@ La ejecución inicial con Jest dio 13 casos fallidos (`evidencias/pruebas-inicia
 | Prioridad | **Alta.** Los datos que llegan desde un formulario o una API suelen venir como texto, así que este escenario es frecuente. |
 | Causa probable | La función no comprueba el tipo. El operador `*` de JavaScript convierte los operandos de forma implícita: `"100"` pasa a ser 100, `null` pasa a ser 0 y `undefined` pasa a ser `NaN`. Es el mismo tipo de problema que encontré en la Unidad 1 con `==` (H-07). |
 | Evidencia | `evidencias/pruebas-iniciales.txt` ("Received function did not throw") y `evidencias/resultados-reales-iniciales.txt` |
-| Estado | Abierto |
+| Estado | Corregido y verificado (ver "Seguimiento de las correcciones"). |
 
 | Caso | Datos | Resultado real | Problema |
 |---|---|---|---|
@@ -122,3 +122,18 @@ Las comparaciones respetan los límites de RF-04 tal como están escritos: el pr
 | Defectos todavía abiertos | CP-07, CP-08 (DEF-01) y CP-14 a CP-19 (DEF-03) | Siguen fallando, como era de esperar. |
 
 **Se cumplió la predicción.** CP-15 y CP-19 cambiaron de comportamiento. Antes devolvían un número; ahora lanzan `RangeError`. Jest lo muestra así: "Expected constructor: TypeError / Received constructor: RangeError". Esto confirma que, con solo la validación de rango, `null` se trata como 0 y `-Infinity` como un número negativo. CP-14 (`"100"`), CP-16 (`undefined`), CP-17 (`NaN`) y CP-18 (`Infinity`) siguen devolviendo un valor, porque las comparaciones con esos datos dan `false` y ninguna validación se activa. La conclusión es que validar el rango no reemplaza a validar el tipo, y que el tipo hay que comprobarlo primero (A-04).
+
+### Corrección 2: DEF-03
+
+**Cambio en `src/compras.js`.** Agregué la función auxiliar `validarNumero(valor, nombre)`, que lanza `TypeError` cuando `Number.isFinite(valor)` es `false`. Se llama para los tres parámetros **antes** de las validaciones de rango.
+
+Elegí `Number.isFinite` en lugar de la función global `isFinite` por una razón concreta. `isFinite("100")` convierte el texto y devuelve `true`, así que volvería a dejar pasar el caso CP-14. `Number.isFinite` no convierte nada: devuelve `false` para cualquier valor que no sea de tipo `number` y también para `NaN`, `Infinity` y `-Infinity`. Así, con una sola comprobación se cubren las dos partes de RF-05 (no numérico y no finito).
+
+**Resultado de la regresión completa:** pasan 17 y fallan 2. Evidencias: `evidencias/pruebas-correccion-DEF-03.txt` y `npm run reproducir`.
+
+| Tipo de verificación | Casos | Resultado |
+|---|---|---|
+| Confirmación de DEF-03 | CP-14 a CP-19 | Los 6 pasan. Lanzan `TypeError` con un mensaje que indica qué parámetro es inválido. |
+| Precedencia del tipo sobre el rango (A-04) | CP-15, CP-19 | Ahora lanzan `TypeError`. En la corrección 1 lanzaban `RangeError`. |
+| Regresión | CP-01 a CP-13 | Siguen pasando, incluidas las 5 confirmaciones de DEF-02. |
+| Defecto todavía abierto | CP-07, CP-08 (DEF-01) | Siguen fallando, como era de esperar. |

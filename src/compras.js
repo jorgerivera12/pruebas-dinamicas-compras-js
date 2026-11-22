@@ -1,4 +1,19 @@
+// RF-05: rechazar entradas no numéricas o no finitas (DEF-03).
+// Number.isFinite devuelve false para cualquier valor que no sea de tipo number
+// (texto, null, undefined, booleanos) y también para NaN, Infinity y -Infinity.
+// A diferencia de isFinite global, no convierte el valor: Number.isFinite('100') es false.
+function validarNumero(valor, nombre) {
+  if (!Number.isFinite(valor)) {
+    throw new TypeError(`${nombre} debe ser un número finito`);
+  }
+}
+
 function calcularTotal(precio, cantidad, descuento) {
+  // El tipo se valida antes que el rango (supuesto A-04 del plan de pruebas).
+  validarNumero(precio, 'El precio');
+  validarNumero(cantidad, 'La cantidad');
+  validarNumero(descuento, 'El descuento');
+
   // RF-04: rechazar valores fuera de rango (DEF-02).
   if (precio < 0) {
     throw new RangeError('El precio no puede ser negativo');
