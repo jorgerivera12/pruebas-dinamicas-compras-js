@@ -1,0 +1,16 @@
+{
+  "name": "pruebas-dinamicas-compras-js",
+  "version": "1.0.0",
+  "description": "Pruebas dinámicas con Jest del módulo de compras de una tienda digital",
+  "main": "src/compras.js",
+  "scripts": {
+    "test": "jest --runInBand",
+    "test:coverage": "jest --runInBand --coverage"
+  },
+  "jest": {
+    "verbose": true
+  },
+  "devDependencies": {
+    "jest": "^30.5.2"
+  }
+}

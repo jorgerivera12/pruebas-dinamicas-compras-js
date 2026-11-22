@@ -1,0 +1,266 @@
+
+> pruebas-dinamicas-compras-js@1.0.0 test
+> jest --runInBand
+
+FAIL tests/compras.test.js
+  RF-01 y RF-02: cálculo del total con datos válidos
+    ✓ CP-01: caso nominal -> 90 (5 ms)
+    ✓ CP-02: precio con decimales -> 30 (1 ms)
+    ✓ CP-03: límite precio = 0 (A-01) -> 0 (1 ms)
+    ✓ CP-04: límite cantidad = 1 -> 49.99
+    ✓ CP-05: límite descuento = 0 -> 160
+  RF-03: total con dos decimales
+    ✓ CP-06: descuento 100 % produce 0 -> 0 (1 ms)
+    ✕ CP-07: redondeo de 50,9745 -> 50.97 (3 ms)
+    ✕ CP-08: error de punto flotante -> 0.3 (1 ms)
+  RF-04: RangeError para valores fuera de rango
+    ✕ CP-09: precio = -0,01 -> RangeError (1 ms)
+    ✕ CP-10: cantidad = 0 -> RangeError
+    ✕ CP-11: cantidad negativa -> RangeError (1 ms)
+    ✕ CP-12: descuento = -0,01 -> RangeError (2 ms)
+    ✕ CP-13: descuento = 100,01 -> RangeError (4 ms)
+  RF-05: TypeError para entradas no numéricas o no finitas
+    ✕ CP-14: precio como texto -> TypeError (1 ms)
+    ✕ CP-15: cantidad null -> TypeError
+    ✕ CP-16: descuento undefined -> TypeError
+    ✕ CP-17: precio NaN -> TypeError
+    ✕ CP-18: cantidad Infinity -> TypeError (1 ms)
+    ✕ CP-19: descuento -Infinity (tipo antes que rango, A-04) -> TypeError (1 ms)
+
+  ● RF-03: total con dos decimales › CP-07: redondeo de 50,9745 -> 50.97
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 50.97
+    Received: 50.9745
+
+      25 |     { id: 'CP-08', datos: [0.1, 3, 0], esperado: 0.3, detalle: 'error de punto flotante' },
+      26 |   ])('$id: $detalle -> $esperado', ({ datos, esperado }) => {
+    > 27 |     expect(calcularTotal(...datos)).toBe(esperado);
+         |                                     ^
+      28 |   });
+      29 | });
+      30 |
+
+      at toBe (tests/compras.test.js:27:37)
+
+  ● RF-03: total con dos decimales › CP-08: error de punto flotante -> 0.3
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 0.3
+    Received: 0.30000000000000004
+
+      25 |     { id: 'CP-08', datos: [0.1, 3, 0], esperado: 0.3, detalle: 'error de punto flotante' },
+      26 |   ])('$id: $detalle -> $esperado', ({ datos, esperado }) => {
+    > 27 |     expect(calcularTotal(...datos)).toBe(esperado);
+         |                                     ^
+      28 |   });
+      29 | });
+      30 |
+
+      at toBe (tests/compras.test.js:27:37)
+
+  ● RF-04: RangeError para valores fuera de rango › CP-09: precio = -0,01 -> RangeError
+
+    expect(received).toThrow(expected)
+
+    Expected constructor: RangeError
+
+    Received function did not throw
+
+      37 |     { id: 'CP-13', datos: [100, 1, 100.01], detalle: 'descuento = 100,01' },
+      38 |   ])('$id: $detalle -> RangeError', ({ datos }) => {
+    > 39 |     expect(() => calcularTotal(...datos)).toThrow(RangeError);
+         |                                           ^
+      40 |   });
+      41 | });
+      42 |
+
+      at toThrow (tests/compras.test.js:39:43)
+
+  ● RF-04: RangeError para valores fuera de rango › CP-10: cantidad = 0 -> RangeError
+
+    expect(received).toThrow(expected)
+
+    Expected constructor: RangeError
+
+    Received function did not throw
+
+      37 |     { id: 'CP-13', datos: [100, 1, 100.01], detalle: 'descuento = 100,01' },
+      38 |   ])('$id: $detalle -> RangeError', ({ datos }) => {
+    > 39 |     expect(() => calcularTotal(...datos)).toThrow(RangeError);
+         |                                           ^
+      40 |   });
+      41 | });
+      42 |
+
+      at toThrow (tests/compras.test.js:39:43)
+
+  ● RF-04: RangeError para valores fuera de rango › CP-11: cantidad negativa -> RangeError
+
+    expect(received).toThrow(expected)
+
+    Expected constructor: RangeError
+
+    Received function did not throw
+
+      37 |     { id: 'CP-13', datos: [100, 1, 100.01], detalle: 'descuento = 100,01' },
+      38 |   ])('$id: $detalle -> RangeError', ({ datos }) => {
+    > 39 |     expect(() => calcularTotal(...datos)).toThrow(RangeError);
+         |                                           ^
+      40 |   });
+      41 | });
+      42 |
+
+      at toThrow (tests/compras.test.js:39:43)
+
+  ● RF-04: RangeError para valores fuera de rango › CP-12: descuento = -0,01 -> RangeError
+
+    expect(received).toThrow(expected)
+
+    Expected constructor: RangeError
+
+    Received function did not throw
+
+      37 |     { id: 'CP-13', datos: [100, 1, 100.01], detalle: 'descuento = 100,01' },
+      38 |   ])('$id: $detalle -> RangeError', ({ datos }) => {
+    > 39 |     expect(() => calcularTotal(...datos)).toThrow(RangeError);
+         |                                           ^
+      40 |   });
+      41 | });
+      42 |
+
+      at toThrow (tests/compras.test.js:39:43)
+
+  ● RF-04: RangeError para valores fuera de rango › CP-13: descuento = 100,01 -> RangeError
+
+    expect(received).toThrow(expected)
+
+    Expected constructor: RangeError
+
+    Received function did not throw
+
+      37 |     { id: 'CP-13', datos: [100, 1, 100.01], detalle: 'descuento = 100,01' },
+      38 |   ])('$id: $detalle -> RangeError', ({ datos }) => {
+    > 39 |     expect(() => calcularTotal(...datos)).toThrow(RangeError);
+         |                                           ^
+      40 |   });
+      41 | });
+      42 |
+
+      at toThrow (tests/compras.test.js:39:43)
+
+  ● RF-05: TypeError para entradas no numéricas o no finitas › CP-14: precio como texto -> TypeError
+
+    expect(received).toThrow(expected)
+
+    Expected constructor: TypeError
+
+    Received function did not throw
+
+      50 |     { id: 'CP-19', datos: [100, 2, -Infinity], detalle: 'descuento -Infinity (tipo antes que rango, A-04)' },
+      51 |   ])('$id: $detalle -> TypeError', ({ datos }) => {
+    > 52 |     expect(() => calcularTotal(...datos)).toThrow(TypeError);
+         |                                           ^
+      53 |   });
+      54 | });
+      55 |
+
+      at toThrow (tests/compras.test.js:52:43)
+
+  ● RF-05: TypeError para entradas no numéricas o no finitas › CP-15: cantidad null -> TypeError
+
+    expect(received).toThrow(expected)
+
+    Expected constructor: TypeError
+
+    Received function did not throw
+
+      50 |     { id: 'CP-19', datos: [100, 2, -Infinity], detalle: 'descuento -Infinity (tipo antes que rango, A-04)' },
+      51 |   ])('$id: $detalle -> TypeError', ({ datos }) => {
+    > 52 |     expect(() => calcularTotal(...datos)).toThrow(TypeError);
+         |                                           ^
+      53 |   });
+      54 | });
+      55 |
+
+      at toThrow (tests/compras.test.js:52:43)
+
+  ● RF-05: TypeError para entradas no numéricas o no finitas › CP-16: descuento undefined -> TypeError
+
+    expect(received).toThrow(expected)
+
+    Expected constructor: TypeError
+
+    Received function did not throw
+
+      50 |     { id: 'CP-19', datos: [100, 2, -Infinity], detalle: 'descuento -Infinity (tipo antes que rango, A-04)' },
+      51 |   ])('$id: $detalle -> TypeError', ({ datos }) => {
+    > 52 |     expect(() => calcularTotal(...datos)).toThrow(TypeError);
+         |                                           ^
+      53 |   });
+      54 | });
+      55 |
+
+      at toThrow (tests/compras.test.js:52:43)
+
+  ● RF-05: TypeError para entradas no numéricas o no finitas › CP-17: precio NaN -> TypeError
+
+    expect(received).toThrow(expected)
+
+    Expected constructor: TypeError
+
+    Received function did not throw
+
+      50 |     { id: 'CP-19', datos: [100, 2, -Infinity], detalle: 'descuento -Infinity (tipo antes que rango, A-04)' },
+      51 |   ])('$id: $detalle -> TypeError', ({ datos }) => {
+    > 52 |     expect(() => calcularTotal(...datos)).toThrow(TypeError);
+         |                                           ^
+      53 |   });
+      54 | });
+      55 |
+
+      at toThrow (tests/compras.test.js:52:43)
+
+  ● RF-05: TypeError para entradas no numéricas o no finitas › CP-18: cantidad Infinity -> TypeError
+
+    expect(received).toThrow(expected)
+
+    Expected constructor: TypeError
+
+    Received function did not throw
+
+      50 |     { id: 'CP-19', datos: [100, 2, -Infinity], detalle: 'descuento -Infinity (tipo antes que rango, A-04)' },
+      51 |   ])('$id: $detalle -> TypeError', ({ datos }) => {
+    > 52 |     expect(() => calcularTotal(...datos)).toThrow(TypeError);
+         |                                           ^
+      53 |   });
+      54 | });
+      55 |
+
+      at toThrow (tests/compras.test.js:52:43)
+
+  ● RF-05: TypeError para entradas no numéricas o no finitas › CP-19: descuento -Infinity (tipo antes que rango, A-04) -> TypeError
+
+    expect(received).toThrow(expected)
+
+    Expected constructor: TypeError
+
+    Received function did not throw
+
+      50 |     { id: 'CP-19', datos: [100, 2, -Infinity], detalle: 'descuento -Infinity (tipo antes que rango, A-04)' },
+      51 |   ])('$id: $detalle -> TypeError', ({ datos }) => {
+    > 52 |     expect(() => calcularTotal(...datos)).toThrow(TypeError);
+         |                                           ^
+      53 |   });
+      54 | });
+      55 |
+
+      at toThrow (tests/compras.test.js:52:43)
+
+Test Suites: 1 failed, 1 total
+Tests:       13 failed, 6 passed, 19 total
+Snapshots:   0 total
+Time:        0.382 s, estimated 1 s
+Ran all test suites.
