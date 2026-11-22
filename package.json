@@ -5,7 +5,8 @@
   "main": "src/compras.js",
   "scripts": {
     "test": "jest --runInBand",
-    "test:coverage": "jest --runInBand --coverage"
+    "test:coverage": "jest --runInBand --coverage",
+    "reproducir": "node scripts/reproducir-casos.js"
   },
   "jest": {
     "verbose": true
