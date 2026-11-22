@@ -6,7 +6,8 @@
   "scripts": {
     "test": "jest --runInBand",
     "test:coverage": "jest --runInBand --coverage",
-    "reproducir": "node scripts/reproducir-casos.js"
+    "reproducir": "node scripts/reproducir-casos.js",
+    "rendimiento": "node scripts/rendimiento.js"
   },
   "jest": {
     "verbose": true

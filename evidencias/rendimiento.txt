@@ -1,0 +1,123 @@
+################ Corrida 1 de 3 ################
+PR-01: medición exploratoria de rendimiento de calcularTotal
+Fecha: 2026-11-22T05:37:39.511Z
+
+Entorno
+  Node.js v18.19.1 (V8 10.2.154.26-node.28)
+  Sistema: Linux 6.14.0-36-generic x64
+  CPU: AMD Ryzen 5 4600H with Radeon Graphics (12 hilos), gobernador de frecuencia: powersave
+  Memoria: 30.8 GiB; carga media al iniciar: 0.89 (1 min), 0.99 (5 min)
+
+Método
+  200000 llamadas de calentamiento y luego 30 tandas de 10000 llamadas con datos válidos variados.
+  a) Cada llamada se mide por separado con process.hrtime.bigint() para obtener percentiles por llamada.
+  b) Cada tanda se mide también en bloque para estimar el costo real por llamada sin el costo del reloj.
+  Costo de leer el reloj dos veces (mediana): 70 ns. Está incluido en los tiempos de (a).
+
+Resultados
+  Inicial (enunciado)
+    (a) por llamada, 300000 llamadas: p50      90 ns | p95     141 ns | p99     171 ns | máximo  272275 ns
+        llamadas por encima de 1 ms: 0
+    (b) en bloque, promedio por llamada: mediana      20 ns (mín. 15.8 ns, máx. 2412.8 ns entre tandas)
+        aproximadamente 49.9 millones de llamadas por segundo
+  Corregida sin redondeo (solo análisis)
+    (a) por llamada, 300000 llamadas: p50     140 ns | p95     190 ns | p99     261 ns | máximo  533909 ns
+        llamadas por encima de 1 ms: 0
+    (b) en bloque, promedio por llamada: mediana      61 ns (mín. 43.9 ns, máx. 2846.2 ns entre tandas)
+        aproximadamente 16.5 millones de llamadas por segundo
+  Corregida
+    (a) por llamada, 300000 llamadas: p50     431 ns | p95     581 ns | p99     781 ns | máximo   63029 ns
+        llamadas por encima de 1 ms: 0
+    (b) en bloque, promedio por llamada: mediana     295 ns (mín. 273.8 ns, máx. 390.1 ns entre tandas)
+        aproximadamente 3.4 millones de llamadas por segundo
+
+Comparación (bloque, mediana)
+  Costo adicional de la versión corregida: 275.0 ns por llamada (14.7 veces el tiempo inicial).
+    - validaciones y fórmula: 40.6 ns
+    - redondeo con toPrecision: 234.4 ns
+  Referencia S-01 de la Unidad 1 (no aprobada): p95 <= 1 ms. p95 de la versión corregida: 581 ns, 1721 veces por debajo del umbral.
+
+(Valor de control para evitar que se eliminen las llamadas: 6253372456.94)
+
+################ Corrida 2 de 3 ################
+PR-01: medición exploratoria de rendimiento de calcularTotal
+Fecha: 2026-11-22T05:37:41.089Z
+
+Entorno
+  Node.js v18.19.1 (V8 10.2.154.26-node.28)
+  Sistema: Linux 6.14.0-36-generic x64
+  CPU: AMD Ryzen 5 4600H with Radeon Graphics (12 hilos), gobernador de frecuencia: powersave
+  Memoria: 30.8 GiB; carga media al iniciar: 0.89 (1 min), 0.99 (5 min)
+
+Método
+  200000 llamadas de calentamiento y luego 30 tandas de 10000 llamadas con datos válidos variados.
+  a) Cada llamada se mide por separado con process.hrtime.bigint() para obtener percentiles por llamada.
+  b) Cada tanda se mide también en bloque para estimar el costo real por llamada sin el costo del reloj.
+  Costo de leer el reloj dos veces (mediana): 80 ns. Está incluido en los tiempos de (a).
+
+Resultados
+  Inicial (enunciado)
+    (a) por llamada, 300000 llamadas: p50      90 ns | p95     121 ns | p99     151 ns | máximo  110149 ns
+        llamadas por encima de 1 ms: 0
+    (b) en bloque, promedio por llamada: mediana      25 ns (mín. 20.1 ns, máx. 2169.2 ns entre tandas)
+        aproximadamente 39.4 millones de llamadas por segundo
+  Corregida sin redondeo (solo análisis)
+    (a) por llamada, 300000 llamadas: p50     131 ns | p95     170 ns | p99     210 ns | máximo 1321459 ns
+        llamadas por encima de 1 ms: 1
+    (b) en bloque, promedio por llamada: mediana      61 ns (mín. 45.0 ns, máx. 2368.0 ns entre tandas)
+        aproximadamente 16.4 millones de llamadas por segundo
+  Corregida
+    (a) por llamada, 300000 llamadas: p50     451 ns | p95     611 ns | p99     832 ns | máximo  477423 ns
+        llamadas por encima de 1 ms: 0
+    (b) en bloque, promedio por llamada: mediana     306 ns (mín. 272.5 ns, máx. 456.2 ns entre tandas)
+        aproximadamente 3.3 millones de llamadas por segundo
+
+Comparación (bloque, mediana)
+  Costo adicional de la versión corregida: 280.5 ns por llamada (12.1 veces el tiempo inicial).
+    - validaciones y fórmula: 35.8 ns
+    - redondeo con toPrecision: 244.7 ns
+  Referencia S-01 de la Unidad 1 (no aprobada): p95 <= 1 ms. p95 de la versión corregida: 611 ns, 1637 veces por debajo del umbral.
+
+(Valor de control para evitar que se eliminen las llamadas: 6253372456.94)
+
+################ Corrida 3 de 3 ################
+PR-01: medición exploratoria de rendimiento de calcularTotal
+Fecha: 2026-11-22T05:37:42.660Z
+
+Entorno
+  Node.js v18.19.1 (V8 10.2.154.26-node.28)
+  Sistema: Linux 6.14.0-36-generic x64
+  CPU: AMD Ryzen 5 4600H with Radeon Graphics (12 hilos), gobernador de frecuencia: powersave
+  Memoria: 30.8 GiB; carga media al iniciar: 0.98 (1 min), 1.00 (5 min)
+
+Método
+  200000 llamadas de calentamiento y luego 30 tandas de 10000 llamadas con datos válidos variados.
+  a) Cada llamada se mide por separado con process.hrtime.bigint() para obtener percentiles por llamada.
+  b) Cada tanda se mide también en bloque para estimar el costo real por llamada sin el costo del reloj.
+  Costo de leer el reloj dos veces (mediana): 70 ns. Está incluido en los tiempos de (a).
+
+Resultados
+  Inicial (enunciado)
+    (a) por llamada, 300000 llamadas: p50      81 ns | p95     131 ns | p99     151 ns | máximo 3038666 ns
+        llamadas por encima de 1 ms: 1
+    (b) en bloque, promedio por llamada: mediana      21 ns (mín. 15.6 ns, máx. 2052.6 ns entre tandas)
+        aproximadamente 46.6 millones de llamadas por segundo
+  Corregida sin redondeo (solo análisis)
+    (a) por llamada, 300000 llamadas: p50     121 ns | p95     171 ns | p99     221 ns | máximo  320577 ns
+        llamadas por encima de 1 ms: 0
+    (b) en bloque, promedio por llamada: mediana      56 ns (mín. 43.1 ns, máx. 2317.0 ns entre tandas)
+        aproximadamente 17.8 millones de llamadas por segundo
+  Corregida
+    (a) por llamada, 300000 llamadas: p50     421 ns | p95     541 ns | p99     721 ns | máximo  504544 ns
+        llamadas por encima de 1 ms: 0
+    (b) en bloque, promedio por llamada: mediana     286 ns (mín. 267.8 ns, máx. 392.0 ns entre tandas)
+        aproximadamente 3.5 millones de llamadas por segundo
+
+Comparación (bloque, mediana)
+  Costo adicional de la versión corregida: 264.8 ns por llamada (13.3 veces el tiempo inicial).
+    - validaciones y fórmula: 34.8 ns
+    - redondeo con toPrecision: 230.0 ns
+  Referencia S-01 de la Unidad 1 (no aprobada): p95 <= 1 ms. p95 de la versión corregida: 541 ns, 1848 veces por debajo del umbral.
+
+(Valor de control para evitar que se eliminen las llamadas: 6253372456.94)
+
